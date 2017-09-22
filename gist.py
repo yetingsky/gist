@@ -1,7 +1,10 @@
+# coding: utf8
+
 import os
 import json
 
 import requests
+import click
 from requests.auth import HTTPBasicAuth
 
 
@@ -23,9 +26,6 @@ class GistClient(object):
         pass
 
     def create(self, file_names, description, public=True, anonymous=False):
-        if (not anonymous) and (not self.auth_token):
-            anonymous = True
-
         files = {}
         for file_name in file_names:
             with open(file_name, 'r') as f:
@@ -33,7 +33,7 @@ class GistClient(object):
 
         url = 'https://api.github.com/gists'
         data = {
-            "description": "the description for this gist",
+            "description": description,
             "public": public,
             "files": files
         }
@@ -55,6 +55,22 @@ class GistClient(object):
         pass
 
 
-if __name__ == '__main__':
-    client = GistClient()
-    r = client.create(['requirements.txt'], 'test', public=True, anonymous=False)
+client = GistClient()
+
+
+@click.group()
+def cli():
+    pass
+
+
+@cli.command()
+@click.argument('files', nargs=-1)
+@click.argument('description', nargs=1)
+@click.option('--public/--no-public', default=True)
+@click.option('--anonymous/--no-anonymous', default=False)
+def create(files, description, public, anonymous):
+    '''python gist.py create file1 file2 description --no-public --anonymous'''
+    print client.create(files, description, public, anonymous)
+
+
+cli()
