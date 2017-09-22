@@ -66,8 +66,9 @@ class GistClient(object):
         gist_url = 'https://gist.github.com/{username}/{id}'
         return gist_url.format(username=self.username, id=content['id'])
 
-    def delete(self):
-        pass
+    def delete(self, id):
+        url = 'https://api.github.com/gists/{id}'.format(id=id)
+        requests.delete(url, auth=HTTPBasicAuth(self.username, self.auth_token))
 
 
 client = GistClient()
@@ -95,6 +96,13 @@ def create(files, description, public, anonymous):
 def edit(id, files, description):
     '''python gist.py edit id file1 file2 description'''
     print client.edit(id, files, description)
+
+
+@cli.command()
+@click.argument('id', nargs=1)
+def delete(id):
+    '''python gist.py delete id'''
+    client.delete(id)
 
 
 cli()
